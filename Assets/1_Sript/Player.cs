@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    // 이동속도 및 점프 파워 
     public int speed;
     public int jump_Power;
+
+    // 변수 선언 
     Rigidbody2D rigid;
     void Awake()
     {
+        // 변수 초기화 
         rigid = GetComponent<Rigidbody2D>();
     }
 

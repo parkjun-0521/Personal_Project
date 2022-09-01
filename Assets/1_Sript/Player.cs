@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        // 단순 이동 로직 
         float h = Input.GetAxisRaw("Horizontal");
         rigid.AddForce(Vector2.right * h * speed, ForceMode2D.Force);
     }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public int speed;
+    public int jump_Power;
     Rigidbody2D rigid;
     void Awake()
     {
@@ -13,8 +14,16 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        // 단순 이동 로직 
+         // 단순 점프 로직 
+        if (Input.GetButtonDown("Jump")){
+            rigid.AddForce(Vector2.up * jump_Power, ForceMode2D.Impulse);
+        }
+    }
+
+    void FixedUpdate()
+    {
+        // 단순 이동 로직
         float h = Input.GetAxisRaw("Horizontal");
-        rigid.AddForce(Vector2.right * h * speed, ForceMode2D.Force);
+        rigid.AddForce(Vector2.right * h * speed, ForceMode2D.Impulse);
     }
 }

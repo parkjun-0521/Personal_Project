@@ -8,11 +8,13 @@ public class Player : MonoBehaviour
     float hAxis;                    // 이동 input 변수
     bool jDown;                     // 점프 input 변수 
     bool dDown;                     // 회피 input 변수
+    bool aDown;                     // 공격 input 변수 
 
     // 점프 변수 
     public int jump_Power;          // 점프 파워 
     int jumpCount = 0;              // 2단 점프를 확인하기 
     bool jumpStop = false;          // 무한 점프를 막기  
+    bool jumpCheck;
 
     // 스피드 변수 
     public float speed;             // 기본 스피드 
@@ -21,17 +23,19 @@ public class Player : MonoBehaviour
 
     // 회피     
     bool isDodge;                   // 무한 회피 막기 
-    int DodgeCount;                 // 회피 1번 
+    bool dodgeCheck;
 
     // 변수 선언 
     Rigidbody2D rigid;              // rigidbody 변수 선언
     SpriteRenderer spriteRenderer;  // spriteRenderer 변수 선언 
+    Animator anime;
 
     void Awake()
     {
         // 변수 초기화 
         rigid = GetComponent<Rigidbody2D>();                    // Rigidbody2D 변수 초기화 
         spriteRenderer = GetComponent<SpriteRenderer>();        // SpriteRenderer 변수 초기화 
+        anime = GetComponent<Animator>();
     }
 
     void Update()
@@ -40,7 +44,8 @@ public class Player : MonoBehaviour
         Move();
         Turn();
         Jump();
-        Dodge();              
+        Dodge();
+        Attack();
     }
 
     void GetInput()
@@ -48,6 +53,7 @@ public class Player : MonoBehaviour
         hAxis = Input.GetAxisRaw("Horizontal");
         jDown = Input.GetButtonDown("Jump");
         dDown = Input.GetButtonDown("Dodge");
+        aDown = Input.GetButtonDown("Attack");
     }
 
     void Move()
@@ -61,7 +67,11 @@ public class Player : MonoBehaviour
         else if (rigid.velocity.x < maxSpeed * (-1))
             rigid.velocity = new Vector2(maxSpeed * (-1), rigid.velocity.y);
 
-        
+        // 이동 애니메이션 
+        if(rigid.velocity.normalized.x == 0)
+            anime.SetBool("isRun", false);
+        else
+            anime.SetBool("isRun", true);
     }
 
     void Turn()
@@ -77,6 +87,11 @@ public class Player : MonoBehaviour
             if (jumpCount >= 0 && jumpStop == false) {
                 rigid.AddForce(Vector2.up * jump_Power, ForceMode2D.Impulse);
                 jumpCount++;
+
+                jumpCheck = true;
+                // 점프 애니메이션 
+                anime.SetBool("isJump", true);
+
                 if (rigid.velocity.y > masJumpSpeed && jumpCount == 2)
                     rigid.velocity = new Vector2(rigid.velocity.x, masJumpSpeed);
                 if (jumpCount == 2)
@@ -92,7 +107,10 @@ public class Player : MonoBehaviour
                 if (rayHit.distance < 0.7f) {
                     jumpStop = false;
                     jumpCount = 0;
-                    DodgeCount = 0;
+                    jumpCheck = false;
+                    dodgeCheck = false;
+                    // 점프 애니메이션 
+                    anime.SetBool("isJump", false);
                 }
             }
         }
@@ -100,12 +118,21 @@ public class Player : MonoBehaviour
 
     void Dodge()
     {
-        if (dDown && !isDodge && hAxis != 0 && DodgeCount == 0) {
+        if (dDown && !isDodge && hAxis != 0 && jumpCheck == false) {
             speed *= 2;
             maxSpeed *= 2;
-            DodgeCount++;
+            anime.SetTrigger("doDash");
+            rigid.constraints = RigidbodyConstraints2D.FreezeRotation;
+            isDodge = true;
+            Invoke("DodgeOut", 0.3f);
+        }
+        else if (dDown && !isDodge && hAxis != 0 && jumpCheck == true && dodgeCheck == false) {
+            speed *= 2;
+            maxSpeed *= 2;
+            anime.SetTrigger("doDash");
             rigid.constraints = RigidbodyConstraints2D.FreezePositionY;
             isDodge = true;
+            dodgeCheck = true;
             Invoke("DodgeOut", 0.3f);
         }
     }
@@ -117,5 +144,12 @@ public class Player : MonoBehaviour
         rigid.constraints = RigidbodyConstraints2D.None;
         rigid.constraints = RigidbodyConstraints2D.FreezeRotation;
         isDodge = false;
+    }
+
+    void Attack()
+    {
+        if (aDown && !isDodge) {
+
+        }
     }
 }

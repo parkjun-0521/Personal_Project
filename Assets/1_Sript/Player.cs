@@ -19,11 +19,16 @@ public class Player : MonoBehaviour
     // 스피드 변수 
     public float speed;             // 기본 스피드 
     public float maxSpeed;          // 최대 스피드 
-    public float masJumpSpeed;      // 최대 점프 스피드 
+    public float maxJumpSpeed;      // 최대 점프 스피드 
 
     // 회피     
     bool isDodge;                   // 무한 회피 막기 
     bool dodgeCheck;
+
+    // 공격 
+    public float attackDelay;
+    public float maxDelay;
+    bool attaackCheck;
 
     // 변수 선언 
     Rigidbody2D rigid;              // rigidbody 변수 선언
@@ -59,7 +64,9 @@ public class Player : MonoBehaviour
     void Move()
     {
         // 단순 이동 로직
-        rigid.AddForce(Vector2.right * hAxis * speed, ForceMode2D.Impulse);
+        if (!attaackCheck)
+            rigid.AddForce(Vector2.right * hAxis * speed, ForceMode2D.Impulse);
+
 
         // 최대 속도 제한 
         if (rigid.velocity.x > maxSpeed)
@@ -92,8 +99,8 @@ public class Player : MonoBehaviour
                 // 점프 애니메이션 
                 anime.SetBool("isJump", true);
 
-                if (rigid.velocity.y > masJumpSpeed && jumpCount == 2)
-                    rigid.velocity = new Vector2(rigid.velocity.x, masJumpSpeed);
+                if (rigid.velocity.y > maxJumpSpeed && jumpCount == 2)
+                    rigid.velocity = new Vector2(rigid.velocity.x, maxJumpSpeed);
                 if (jumpCount == 2)
                     jumpStop = true;
             }
@@ -148,8 +155,17 @@ public class Player : MonoBehaviour
 
     void Attack()
     {
-        if (aDown && !isDodge) {
-
+        attackDelay += Time.deltaTime;
+        if (aDown && !isDodge && attackDelay > maxDelay) {
+            attaackCheck = true;
+            anime.SetTrigger("doAttack");
+            attackDelay = 0;
+            Invoke("AttackEnd", 0.7f);
         }
+    }
+
+    void AttackEnd()
+    {
+        attaackCheck = false;
     }
 }

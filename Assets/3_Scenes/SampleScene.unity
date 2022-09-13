@@ -517,7 +517,9 @@ MonoBehaviour:
   jump_Power: 16
   speed: 5
   maxSpeed: 5
-  masJumpSpeed: 13
+  maxJumpSpeed: 18
+  attackDelay: 0
+  maxDelay: 0.7
 --- !u!95 &242051684
 Animator:
   serializedVersion: 4
@@ -592,7 +594,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

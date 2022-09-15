@@ -153,6 +153,7 @@ public class Player : MonoBehaviour
         isDodge = false;
     }
 
+    // 공격관련 함수 
     void Attack()
     {
         attackDelay += Time.deltaTime;

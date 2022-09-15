@@ -248,7 +248,7 @@ GameObject:
   - component: {fileID: 181337043}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -383,7 +383,7 @@ GameObject:
   - component: {fileID: 242051684}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -519,10 +519,7 @@ MonoBehaviour:
   maxSpeed: 5
   maxJumpSpeed: 18
   attackDelay: 0
-  curAttackDelay: 0
-  maxDelay: 0.2
-  attackCount: 0
-  doubleAttackDelay: 5
+  maxDelay: 0.7
 --- !u!95 &242051684
 Animator:
   serializedVersion: 4

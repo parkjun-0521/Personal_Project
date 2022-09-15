@@ -27,10 +27,7 @@ public class Player : MonoBehaviour
 
     // 공격 
     public float attackDelay;
-    public float curAttackDelay;
     public float maxDelay;
-    public float attackCount = 0;
-    public float doubleAttackDelay;
     bool attaackCheck;
 
     // 변수 선언 
@@ -159,23 +156,16 @@ public class Player : MonoBehaviour
     void Attack()
     {
         attackDelay += Time.deltaTime;
-        curAttackDelay += Time.deltaTime;
         if (aDown && !isDodge && attackDelay > maxDelay) {
             attaackCheck = true;
             anime.SetTrigger("doAttack");
-            attackCount++;
-            if(attackCount == 2 && curAttackDelay < doubleAttackDelay) {
-                anime.SetTrigger("doAttack_2");
-            }
             attackDelay = 0;
-            Invoke("AttackEnd", 1f);
+            Invoke("AttackEnd", 0.7f);
         }
     }
 
     void AttackEnd()
     {
-        curAttackDelay = 0;
         attaackCheck = false;
-        attackCount = 0;
     }
 }

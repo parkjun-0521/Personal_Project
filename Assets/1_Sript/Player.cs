@@ -6,9 +6,9 @@ public class Player : MonoBehaviour
 {
     // input 변수 
     float hAxis;                    // 이동 input 변수
-    bool jDown;                     // 점프 input 변수 
+    bool jDown;                     // 점프 input 변수
     bool dDown;                     // 회피 input 변수
-    bool aDown;                     // 공격 input 변수 
+    bool aDown;                     // 공격 input 변수
 
     // 점프 변수 
     public int jump_Power;          // 점프 파워 
@@ -66,6 +66,8 @@ public class Player : MonoBehaviour
         // 단순 이동 로직
         if (!attaackCheck)
             rigid.AddForce(Vector2.right * hAxis * speed, ForceMode2D.Impulse);
+        else
+            rigid.AddForce(Vector3.zero, ForceMode2D.Impulse);
 
 
         // 최대 속도 제한 
@@ -157,16 +159,23 @@ public class Player : MonoBehaviour
     void Attack()
     {
         attackDelay += Time.deltaTime;
-        if (aDown && !isDodge && attackDelay > maxDelay) {
+        if (aDown && !isDodge && attackDelay > maxDelay && !jumpCheck) {
             attaackCheck = true;
-            anime.SetTrigger("doAttack");
+            anime.SetTrigger("doAttackCombo");
             attackDelay = 0;
-            Invoke("AttackEnd", 0.7f);
+            Invoke("AttackEnd", 1.5f);
+        }
+        else if(aDown && !isDodge && attackDelay > maxDelay && jumpCheck) {
+            attaackCheck = true;
+            anime.SetBool("isJumpAttack", true);
+            attackDelay = 0;
+            Invoke("AttackEnd", 0.3f);
         }
     }
 
     void AttackEnd()
     {
         attaackCheck = false;
+        anime.SetBool("isJumpAttack", false);
     }
 }

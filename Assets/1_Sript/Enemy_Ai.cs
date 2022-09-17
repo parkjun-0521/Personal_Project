@@ -10,8 +10,8 @@ public class Enemy_Ai : MonoBehaviour
     SpriteRenderer spriteRenderer;
     Animator anime;
     Rigidbody2D rigid;
-    
-   
+
+
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
@@ -21,29 +21,42 @@ public class Enemy_Ai : MonoBehaviour
 
     void Update()
     {
+        // 플레이어와의 거리 계산 
         float dis = Vector3.Distance(transform.position, target.position);
-
-        if (dis <= 5) 
-            Move();
-        else
+        if (dis <= 5) {
+            if (dis <= 1)
+                Attack();
+            else {
+                anime.SetBool("isEnemyAttack", false);
+                Move();
+            }
+        }
+        else {
+            anime.SetBool("isWalk", false);
             return;
+        }
     }
 
     void Move()
     {
-        float dir = target.position.x - transform.position.x;
-        if (dir < 0) {
-            dir = -1;
+        float move = target.position.x - transform.position.x;
+        if (move < 0) {
+            move = -1;
             spriteRenderer.flipX = false;
         }
-        else { 
-            dir = 1;
+        else {
+            move = 1;
             spriteRenderer.flipX = true;
         }
 
-        if (dir != 0)
+        if (move != 0)
             anime.SetBool("isWalk", true);
 
-        transform.Translate(new Vector2(dir, 0) * speed * Time.deltaTime);      
+        transform.Translate(new Vector2(move, 0) * speed * Time.deltaTime);      
+    }
+
+    void Attack()
+    {
+        anime.SetBool("isEnemyAttack", true);
     }
 }

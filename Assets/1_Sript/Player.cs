@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
     Rigidbody2D rigid;              // rigidbody 변수 선언
     SpriteRenderer spriteRenderer;  // spriteRenderer 변수 선언 
     Animator anime;
+    BoxCollider2D boxCollider2D;
 
     void Awake()
     {
@@ -41,6 +42,7 @@ public class Player : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();                    // Rigidbody2D 변수 초기화 
         spriteRenderer = GetComponent<SpriteRenderer>();        // SpriteRenderer 변수 초기화 
         anime = GetComponent<Animator>();
+        boxCollider2D = GetComponent<BoxCollider2D>();
     }
 
     void Update()
@@ -86,8 +88,9 @@ public class Player : MonoBehaviour
     void Turn()
     {
         // 보는 방향 전환 
-        if (Input.GetButton("Horizontal"))
+        if (Input.GetButton("Horizontal")) {
             spriteRenderer.flipX = hAxis == -1;
+        }
     }
     void Jump()
     {
@@ -125,6 +128,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // 회피 구현 
     void Dodge()
     {
         if (dDown && !isDodge && hAxis != 0 && jumpCheck == false) {
@@ -135,10 +139,12 @@ public class Player : MonoBehaviour
             isDodge = true;
             Invoke("DodgeOut", 0.3f);
         }
+        // 공중에서는 회피가 한번만 가능하도록 조건 추가 
         else if (dDown && !isDodge && hAxis != 0 && jumpCheck == true && dodgeCheck == false) {
             speed *= 2;
             maxSpeed *= 2;
             anime.SetTrigger("doDash");
+            // 공중 회피시 y위치 고정 
             rigid.constraints = RigidbodyConstraints2D.FreezePositionY;
             isDodge = true;
             dodgeCheck = true;
@@ -158,6 +164,7 @@ public class Player : MonoBehaviour
     // 공격관련 함수 
     void Attack()
     {
+        // 지상 공격 
         attackDelay += Time.deltaTime;
         if (aDown && !isDodge && attackDelay > maxDelay && !jumpCheck) {
             attaackCheck = true;
@@ -165,6 +172,7 @@ public class Player : MonoBehaviour
             attackDelay = 0;
             Invoke("AttackEnd", 1.5f);
         }
+        // 공중 공격 
         else if(aDown && !isDodge && attackDelay > maxDelay && jumpCheck) {
             attaackCheck = true;
             anime.SetBool("isJumpAttack", true);
@@ -173,6 +181,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // 공격이 끝나고 원상태 복귀 
     void AttackEnd()
     {
         attaackCheck = false;

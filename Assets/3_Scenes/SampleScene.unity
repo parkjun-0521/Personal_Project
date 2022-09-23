@@ -427,6 +427,7 @@ GameObject:
   - component: {fileID: 242051680}
   - component: {fileID: 242051679}
   - component: {fileID: 242051682}
+  - component: {fileID: 242051685}
   - component: {fileID: 242051681}
   - component: {fileID: 242051683}
   - component: {fileID: 242051684}
@@ -569,6 +570,9 @@ MonoBehaviour:
   maxJumpSpeed: 18
   attackDelay: 0
   maxDelay: 0.7
+  maxTime: 2
+  curTime: 0
+  attackCount: 0
 --- !u!95 &242051684
 Animator:
   serializedVersion: 4
@@ -589,6 +593,22 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!70 &242051685
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 242051678}
+  m_Enabled: 0
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.08, y: -0.04}
+  m_Size: {x: 0.4, y: 0.44}
+  m_Direction: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

@@ -30,6 +30,13 @@ public class Player : MonoBehaviour
     public float maxDelay;
     bool attaackCheck;
 
+    // 콤보 공격  
+    public float maxTime;
+    public float curTime;
+    public int attackCount = 0;
+
+    
+
     // 변수 선언 
     Rigidbody2D rigid;              // rigidbody 변수 선언
     SpriteRenderer spriteRenderer;  // spriteRenderer 변수 선언 
@@ -90,6 +97,7 @@ public class Player : MonoBehaviour
         // 보는 방향 전환 
         if (Input.GetButton("Horizontal")) {
             spriteRenderer.flipX = hAxis == -1;
+            //gameObject.GetComponent<BoxCollider2D>().enabled = false;
         }
     }
     void Jump()
@@ -166,11 +174,41 @@ public class Player : MonoBehaviour
     {
         // 지상 공격 
         attackDelay += Time.deltaTime;
+
+        // 콤보공격을 위한 시간 지정 
+        curTime += Time.deltaTime;
+        // 일정 시간이 되면 콤보 초기화 
+        if (curTime > maxTime)
+            attackCount = 0;
+
+        // 연속 공격 
         if (aDown && !isDodge && attackDelay > maxDelay && !jumpCheck) {
-            attaackCheck = true;
-            anime.SetTrigger("doAttackCombo");
-            attackDelay = 0;
-            Invoke("AttackEnd", 1.5f);
+            if (attackCount == 0) {
+                attaackCheck = true;
+                anime.SetTrigger("doAttack_1");
+                
+                attackDelay = 0;
+                curTime = 0;     
+                Invoke("AttackEnd", 0.7f);
+            }
+            else if (attackCount == 1) {
+                attaackCheck = true;
+                anime.SetTrigger("doAttack_2");
+                attackDelay = 0;
+                curTime = 0;
+                Invoke("AttackEnd", 0.7f);
+            }
+            else if (attackCount == 2) {
+                attaackCheck = true;
+                anime.SetTrigger("doAttack_3");
+                attackDelay = 0;
+                curTime = 0;
+                Invoke("AttackEnd", 0.5f);
+            }
+            attackCount++;
+
+            if (attackCount == 3) 
+                attackCount = 0;
         }
         // 공중 공격 
         else if(aDown && !isDodge && attackDelay > maxDelay && jumpCheck) {

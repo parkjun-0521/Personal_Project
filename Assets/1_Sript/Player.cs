@@ -10,6 +10,9 @@ public class Player : MonoBehaviour
     bool dDown;                     // 회피 input 변수
     bool aDown;                     // 공격 input 변수
 
+    // 이동 변수
+    bool moveCheck;
+
     // 점프 변수 
     public int jump_Power;          // 점프 파워 
     int jumpCount = 0;              // 2단 점프를 확인하기 
@@ -28,16 +31,16 @@ public class Player : MonoBehaviour
     // 공격 
     public float attackDelay;
     public float maxDelay;
-    bool attaackCheck;
+    bool attackCheck;
 
     // 콤보 공격  
     public float maxTime;
     public float curTime;
-    public int attackCount = 0;
-
-    
+    int attackCount = 0;
 
     // 변수 선언 
+    public GameObject RightAttackBox;
+    public GameObject LeftAttackBox;
     Rigidbody2D rigid;              // rigidbody 변수 선언
     SpriteRenderer spriteRenderer;  // spriteRenderer 변수 선언 
     Animator anime;
@@ -73,7 +76,7 @@ public class Player : MonoBehaviour
     void Move()
     {
         // 단순 이동 로직
-        if (!attaackCheck)
+        if (!attackCheck)
             rigid.AddForce(Vector2.right * hAxis * speed, ForceMode2D.Impulse);
         else
             rigid.AddForce(Vector3.zero, ForceMode2D.Impulse);
@@ -86,10 +89,14 @@ public class Player : MonoBehaviour
             rigid.velocity = new Vector2(maxSpeed * (-1), rigid.velocity.y);
 
         // 이동 애니메이션 
-        if(rigid.velocity.normalized.x == 0)
+        if (rigid.velocity.normalized.x == 0) {
             anime.SetBool("isRun", false);
-        else
+            moveCheck = false;
+        }
+        else {
             anime.SetBool("isRun", true);
+            moveCheck = true;
+        }
     }
 
     void Turn()
@@ -97,13 +104,36 @@ public class Player : MonoBehaviour
         // 보는 방향 전환 
         if (Input.GetButton("Horizontal")) {
             spriteRenderer.flipX = hAxis == -1;
-            //gameObject.GetComponent<BoxCollider2D>().enabled = false;
+            
+            // 공격 콜라이더 생성 
+            if(hAxis == -1 && attackCheck == true) {
+                LeftAttackBox.SetActive(true);
+                RightAttackBox.SetActive(false);
+            }
+            else if (hAxis == 1 && attackCheck == true) {
+                LeftAttackBox.SetActive(false);
+                RightAttackBox.SetActive(true);
+            }
+            else if (hAxis == 0 && attackCheck == true) {
+                LeftAttackBox.SetActive(false);
+                RightAttackBox.SetActive(true);
+            }
+        }
+        else if (!(Input.GetButton("Horizontal"))) {
+            if (spriteRenderer.flipX == false && attackCheck == true) {
+                LeftAttackBox.SetActive(false);
+                RightAttackBox.SetActive(true);
+            }
+            else if (spriteRenderer.flipX == true && attackCheck == true) {
+                LeftAttackBox.SetActive(true);
+                RightAttackBox.SetActive(false);
+            }
         }
     }
     void Jump()
     {
         // 2단 점프 로직 
-        if (jDown && !isDodge) {
+        if (jDown && !isDodge && attackCheck == false) {
             if (jumpCount >= 0 && jumpStop == false) {
                 rigid.AddForce(Vector2.up * jump_Power, ForceMode2D.Impulse);
                 jumpCount++;
@@ -184,22 +214,21 @@ public class Player : MonoBehaviour
         // 연속 공격 
         if (aDown && !isDodge && attackDelay > maxDelay && !jumpCheck) {
             if (attackCount == 0) {
-                attaackCheck = true;
-                anime.SetTrigger("doAttack_1");
-                
+                attackCheck = true;
+                anime.SetTrigger("doAttack_1");               
                 attackDelay = 0;
                 curTime = 0;     
                 Invoke("AttackEnd", 0.7f);
             }
             else if (attackCount == 1) {
-                attaackCheck = true;
+                attackCheck = true;
                 anime.SetTrigger("doAttack_2");
                 attackDelay = 0;
                 curTime = 0;
                 Invoke("AttackEnd", 0.7f);
             }
             else if (attackCount == 2) {
-                attaackCheck = true;
+                attackCheck = true;
                 anime.SetTrigger("doAttack_3");
                 attackDelay = 0;
                 curTime = 0;
@@ -212,7 +241,7 @@ public class Player : MonoBehaviour
         }
         // 공중 공격 
         else if(aDown && !isDodge && attackDelay > maxDelay && jumpCheck) {
-            attaackCheck = true;
+            attackCheck = true;
             anime.SetBool("isJumpAttack", true);
             attackDelay = 0;
             Invoke("AttackEnd", 0.3f);
@@ -222,7 +251,9 @@ public class Player : MonoBehaviour
     // 공격이 끝나고 원상태 복귀 
     void AttackEnd()
     {
-        attaackCheck = false;
+        attackCheck = false;
         anime.SetBool("isJumpAttack", false);
+        LeftAttackBox.SetActive(false);
+        RightAttackBox.SetActive(false);
     }
 }

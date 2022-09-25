@@ -38,6 +38,9 @@ public class Player : MonoBehaviour
     public float curTime;
     int attackCount = 0;
 
+    // 체력
+    public float curhealth;
+
     // 변수 선언 
     public GameObject RightAttackBox;
     public GameObject LeftAttackBox;
@@ -207,6 +210,7 @@ public class Player : MonoBehaviour
 
         // 콤보공격을 위한 시간 지정 
         curTime += Time.deltaTime;
+
         // 일정 시간이 되면 콤보 초기화 
         if (curTime > maxTime)
             attackCount = 0;
@@ -255,5 +259,23 @@ public class Player : MonoBehaviour
         anime.SetBool("isJumpAttack", false);
         LeftAttackBox.SetActive(false);
         RightAttackBox.SetActive(false);
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "EnemyAttack") {
+            Enemy_Damage_Range ondamage = collision.gameObject.GetComponent<Enemy_Damage_Range>();
+            Vector3 reactVec = transform.position - collision.transform.position;
+            OnHit(ondamage.damage, reactVec);
+        }
+    }
+
+    void OnHit(float damage, Vector3 reVec)
+    {
+        rigid.AddForce(Vector3.zero, ForceMode2D.Impulse);
+        curhealth -= damage;
+        reVec = reVec.normalized;
+        reVec += Vector3.forward + Vector3.up;
+        rigid.AddForce(reVec * 8.2f, ForceMode2D.Impulse);
     }
 }

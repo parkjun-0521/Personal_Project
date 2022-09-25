@@ -10,6 +10,10 @@ public class Enemy_Ai : MonoBehaviour
     public Transform target;
 
     bool attackCheck;
+    public float curDelay;
+    public float maxDelay;
+
+    public bool hit = false;
 
     public GameObject RightEnemyAttackBox;
     public GameObject LeftEnemyAttackBox;
@@ -31,12 +35,19 @@ public class Enemy_Ai : MonoBehaviour
         // 플레이어와의 거리 계산 
         float dis = Vector3.Distance(transform.position, target.position);
         if (dis <= 5) {
-            if (dis <= 1.2)
+            curDelay += Time.deltaTime;
+            if (dis <= 1.7 && curDelay > maxDelay) {
                 Attack();
+            } 
             else {
+                if (dis <= 1.2 || hit == true) {
+                    rigid.AddForce(Vector3.zero, ForceMode2D.Impulse);
+                    anime.SetBool("isWalk", false);
+                }
+                else
+                    Move();
                 anime.SetBool("isEnemyAttack", false);
                 attackCheck = false;
-                Move();
                 LeftEnemyAttackBox.SetActive(false);
                 RightEnemyAttackBox.SetActive(false);
             }
@@ -71,26 +82,30 @@ public class Enemy_Ai : MonoBehaviour
 
     void Attack()
     {
-        anime.SetBool("isEnemyAttack", true);
-        attackCheck = true;
-        Turn(attackCheck);
-    }
-
-    void Turn(bool atkCheck)
-    {
-        if (spriteRenderer.flipX == false && atkCheck == true) {
+        attackCheck = true;           
+        if (spriteRenderer.flipX == false && attackCheck == true) {
             LeftEnemyAttackBox.SetActive(true);
             RightEnemyAttackBox.SetActive(false);
-        }
-        else if (spriteRenderer.flipX == true && atkCheck == true) {
+            anime.SetBool("isEnemyAttack", true);    
+            Invoke("EndAttack", 0.5f);
+        }    
+        else if (spriteRenderer.flipX == true && attackCheck == true) {
             LeftEnemyAttackBox.SetActive(false);
             RightEnemyAttackBox.SetActive(true);
-       }
+            anime.SetBool("isEnemyAttack", true);           
+            Invoke("EndAttack", 0.5f);
+        }
+    }
+
+    void EndAttack()
+    {
+        curDelay = 0;
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Attack") {
+            hit = true;
             Attack_Damage ondamage = collision.gameObject.GetComponent<Attack_Damage>();
             Vector3 reactVec = transform.position - collision.transform.position;
             OnHit(ondamage.damage, reactVec);         
@@ -99,9 +114,16 @@ public class Enemy_Ai : MonoBehaviour
 
     void OnHit(float damage, Vector3 reVec)
     {
+        curDelay = 0;
         curhealth -= damage;
         reVec = reVec.normalized;
-        reVec += Vector3.up;
-        rigid.AddForce(reVec * 2f, ForceMode2D.Impulse);
+        reVec += Vector3.forward + Vector3.up;
+        rigid.AddForce(reVec * 5f, ForceMode2D.Impulse);
+        Invoke("EndOnHit", 0.3f);
+    }
+
+    void EndOnHit()
+    {
+        hit = false;
     }
 }

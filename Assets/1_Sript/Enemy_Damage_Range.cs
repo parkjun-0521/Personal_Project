@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Enemy_Damage_Range : MonoBehaviour
 {
+    public float damage;
     public Transform target;
     public Vector3 offset;
 

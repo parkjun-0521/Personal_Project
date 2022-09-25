@@ -8,6 +8,7 @@ TagManager:
   - Wall
   - Enemy
   - Attack
+  - EnemyAttack
   layers:
   - Default
   - TransparentFX
@@ -39,8 +40,8 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - EnemyAttack
+  - Attack
   m_SortingLayers:
   - name: Default
     uniqueID: 0

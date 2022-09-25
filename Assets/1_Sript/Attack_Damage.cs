@@ -13,8 +13,4 @@ public class Attack_Damage : MonoBehaviour
         transform.position = target.position + offset;
     }
 
-    public void Ondamage()
-    {
-
-    }
 }

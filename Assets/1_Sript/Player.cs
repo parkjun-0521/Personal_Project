@@ -11,10 +11,13 @@ public class Player : MonoBehaviour
     bool jDown;                     // 점프 input 변수
     bool dDown;                     // 회피 input 변수
     bool aDown;                     // 공격 input 변수
-    bool fDown;                     // 스킬 input 변수 
+    public bool fDown;                     // 스킬 input 변수 
 
     // 이동 변수
     bool moveCheck;
+
+    // Turn 변수 
+    bool isTurn;
 
     // 점프 변수 
     public int jump_Power;          // 점프 파워 
@@ -92,10 +95,10 @@ public class Player : MonoBehaviour
     void Move()
     {
         // 단순 이동 로직
-        if (!attackCheck)
+        if (!attackCheck && !skillCheck)
             rigid.AddForce(Vector2.right * hAxis * speed, ForceMode2D.Impulse);
         else
-            rigid.AddForce(Vector3.zero, ForceMode2D.Impulse);
+            rigid.AddForce(Vector3.zero, ForceMode2D.Force);
 
 
         // 최대 속도 제한 
@@ -118,53 +121,75 @@ public class Player : MonoBehaviour
     void Turn()
     {
         // 보는 방향 전환 
-        if (Input.GetButton("Horizontal")) {
+        if (Input.GetButton("Horizontal") && !isTurn) {
             spriteRenderer.flipX = hAxis == -1;
-            
+
             // 공격 콜라이더 생성 
-            if(hAxis == -1 && attackCheck == true) {
+            if (hAxis == -1 && attackCheck == true) {
                 LeftAttackBox.SetActive(true);
                 RightAttackBox.SetActive(false);
+                stopTrun();
             }
             else if (hAxis == 1 && attackCheck == true) {
                 LeftAttackBox.SetActive(false);
                 RightAttackBox.SetActive(true);
+                stopTrun();
             }
             else if (hAxis == 0 && attackCheck == true) {
                 LeftAttackBox.SetActive(false);
                 RightAttackBox.SetActive(true);
+                stopTrun();
             }
             // 스킬 콜라이더 생성 
             if(hAxis == -1 && skillCheck == true) {
                 lSkillBox.SetActive(true);
                 rSkillBox.SetActive(false);
+                isTurn = true;
+                Invoke("EndTurn", 0.5f);
             }
             else if (hAxis == 1 && skillCheck == true) {
                 lSkillBox.SetActive(false);
                 rSkillBox.SetActive(true);
+                isTurn = true;
+                Invoke("EndTurn", 0.5f);
             }
         }
-        else if (!(Input.GetButton("Horizontal"))) {
+        else if (!(Input.GetButton("Horizontal")) && !isTurn) {
             if (spriteRenderer.flipX == false && attackCheck == true) {
                 LeftAttackBox.SetActive(false);
                 RightAttackBox.SetActive(true);
+                stopTrun();
             }
             else if (spriteRenderer.flipX == true && attackCheck == true) {
                 LeftAttackBox.SetActive(true);
                 RightAttackBox.SetActive(false);
+                stopTrun();
             }
 
-            if (fDown) {
-                if (spriteRenderer.flipX == false && skillCheck == true) {
-                    lSkillBox.SetActive(false);
-                    rSkillBox.SetActive(true);
-                }
-                else if (spriteRenderer.flipX == true && skillCheck == true) {
-                    lSkillBox.SetActive(true);
-                    rSkillBox.SetActive(false);
-                }
+            if (spriteRenderer.flipX == false && skillCheck == true) {
+                lSkillBox.SetActive(false);
+                rSkillBox.SetActive(true);
+                isTurn = true;
+                Invoke("EndTurn", 0.5f);
+            }
+            else if (spriteRenderer.flipX == true && skillCheck == true) {
+                lSkillBox.SetActive(true);
+                rSkillBox.SetActive(false);
+                isTurn = true;
+                Invoke("EndTurn", 0.5f);
             }
         }
+    }
+
+    void stopTrun()
+    {
+        isTurn = true;
+        Invoke("EndTurn", 0.7f);
+    }
+
+    void EndTurn()
+    {
+        isTurn = false;
     }
     void Jump()
     {
@@ -296,15 +321,17 @@ public class Player : MonoBehaviour
 
     void Skill()
     {
-        if (fDown) {
+        if (fDown && !isDodge && attackCheck == false) {
             skillCheck = true;
-            Invoke("EndSkill", 1.5f);
+            Invoke("EndSkill", 1f);
         }
     }
 
     void EndSkill()
     {
         skillCheck = false;
+        lSkillBox.SetActive(false);
+        rSkillBox.SetActive(false);
     }
     void OnTriggerEnter2D( Collider2D collision )
     {

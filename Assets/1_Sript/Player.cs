@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
+using UnityEditor;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -9,6 +11,7 @@ public class Player : MonoBehaviour
     bool jDown;                     // 점프 input 변수
     bool dDown;                     // 회피 input 변수
     bool aDown;                     // 공격 input 변수
+    bool fDown;                     // 스킬 input 변수 
 
     // 이동 변수
     bool moveCheck;
@@ -41,9 +44,17 @@ public class Player : MonoBehaviour
     // 체력
     public float curhealth;
 
+    // 스킬
+    bool skillCheck;
+
     // 변수 선언 
     public GameObject RightAttackBox;
     public GameObject LeftAttackBox;
+    
+    // 스킬 박스 object
+    public GameObject rSkillBox;
+    public GameObject lSkillBox;
+
     Rigidbody2D rigid;              // rigidbody 변수 선언
     SpriteRenderer spriteRenderer;  // spriteRenderer 변수 선언 
     Animator anime;
@@ -66,6 +77,7 @@ public class Player : MonoBehaviour
         Jump();
         Dodge();
         Attack();
+        Skill();
     }
 
     void GetInput()
@@ -74,6 +86,7 @@ public class Player : MonoBehaviour
         jDown = Input.GetButtonDown("Jump");
         dDown = Input.GetButtonDown("Dodge");
         aDown = Input.GetButtonDown("Attack");
+        fDown = Input.GetButtonDown("Fire1");
     }
 
     void Move()
@@ -121,6 +134,15 @@ public class Player : MonoBehaviour
                 LeftAttackBox.SetActive(false);
                 RightAttackBox.SetActive(true);
             }
+            // 스킬 콜라이더 생성 
+            if(hAxis == -1 && skillCheck == true) {
+                lSkillBox.SetActive(true);
+                rSkillBox.SetActive(false);
+            }
+            else if (hAxis == 1 && skillCheck == true) {
+                lSkillBox.SetActive(false);
+                rSkillBox.SetActive(true);
+            }
         }
         else if (!(Input.GetButton("Horizontal"))) {
             if (spriteRenderer.flipX == false && attackCheck == true) {
@@ -130,6 +152,17 @@ public class Player : MonoBehaviour
             else if (spriteRenderer.flipX == true && attackCheck == true) {
                 LeftAttackBox.SetActive(true);
                 RightAttackBox.SetActive(false);
+            }
+
+            if (fDown) {
+                if (spriteRenderer.flipX == false && skillCheck == true) {
+                    lSkillBox.SetActive(false);
+                    rSkillBox.SetActive(true);
+                }
+                else if (spriteRenderer.flipX == true && skillCheck == true) {
+                    lSkillBox.SetActive(true);
+                    rSkillBox.SetActive(false);
+                }
             }
         }
     }
@@ -261,7 +294,19 @@ public class Player : MonoBehaviour
         RightAttackBox.SetActive(false);
     }
 
-    void OnTriggerEnter2D(Collider2D collision)
+    void Skill()
+    {
+        if (fDown) {
+            skillCheck = true;
+            Invoke("EndSkill", 1.5f);
+        }
+    }
+
+    void EndSkill()
+    {
+        skillCheck = false;
+    }
+    void OnTriggerEnter2D( Collider2D collision )
     {
         if (collision.gameObject.tag == "EnemyAttack") {
             Enemy_Damage_Range ondamage = collision.gameObject.GetComponent<Enemy_Damage_Range>();
@@ -269,7 +314,6 @@ public class Player : MonoBehaviour
             OnHit(ondamage.damage, reactVec);
         }
     }
-
     void OnHit(float damage, Vector3 reVec)
     {
         rigid.AddForce(Vector3.zero, ForceMode2D.Impulse);
@@ -277,5 +321,31 @@ public class Player : MonoBehaviour
         reVec = reVec.normalized;
         reVec += Vector3.forward + Vector3.up;
         rigid.AddForce(reVec * 8.2f, ForceMode2D.Impulse);
+        OnDie();
+    }
+    
+    void OnDie()
+    {
+        if(curhealth <= 0) {
+            // 스폰 좌표 지정 
+            // gamemanager에 x,y 좌표저장 후 리스폰 위치 불러오기
+
+            // 애니메이션 
+            anime.SetTrigger("doDeath");
+            attackCheck = true;
+            isDodge = true;
+            jumpCheck = true;
+            // 일정 제화 감소
+            // 체력 max 
+            // 오브젝트 비활성화
+            LeftAttackBox.SetActive(false);
+            RightAttackBox.SetActive(false);
+            Invoke("EndDie", 1.2f);
+        }
+    }
+
+    void EndDie()
+    {
+        gameObject.SetActive(false);
     }
 }

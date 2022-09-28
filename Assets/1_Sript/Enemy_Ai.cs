@@ -8,6 +8,7 @@ public class Enemy_Ai : MonoBehaviour
 
     public float speed;
     public Transform target;
+    bool moveCheck = false;
 
     bool attackCheck;
     public float curDelay;
@@ -63,20 +64,22 @@ public class Enemy_Ai : MonoBehaviour
 
     void Move()
     {
-        float move = target.position.x - transform.position.x;
-        if (move < 0) {
-            move = -1;
-            spriteRenderer.flipX = false;
-        }
-        else {
-            move = 1;
-            spriteRenderer.flipX = true;
-        }
+        if (!moveCheck) {
+            float move = target.position.x - transform.position.x;
+            if (move < 0) {
+                move = -1;
+                spriteRenderer.flipX = false;
+            }
+            else {
+                move = 1;
+                spriteRenderer.flipX = true;
+            }
 
-        if (move != 0)
-            anime.SetBool("isWalk", true);
+            if (move != 0)
+                anime.SetBool("isWalk", true);
 
-        transform.Translate(new Vector2(move, 0) * speed * Time.deltaTime);      
+            transform.Translate(new Vector2(move, 0) * speed * Time.deltaTime);
+        }   
     }
  
 
@@ -119,11 +122,39 @@ public class Enemy_Ai : MonoBehaviour
         reVec = reVec.normalized;
         reVec += Vector3.forward + Vector3.up;
         rigid.AddForce(reVec * 5f, ForceMode2D.Impulse);
+        Die();
         Invoke("EndOnHit", 0.3f);
     }
 
     void EndOnHit()
     {
         hit = false;
+    }
+
+    void Die()
+    {
+        if(curhealth <= 0) {
+            // 공격을 멈춤
+            // 이동을 멈춤 
+            attackCheck = false;
+            moveCheck = true;
+            anime.SetBool("isWalk", false);
+
+            // 죽는 애니메이션 
+            anime.SetTrigger("doDie");
+
+            // 오브젝트 비활성화
+            LeftEnemyAttackBox.SetActive(false);
+            RightEnemyAttackBox.SetActive(false);
+            Invoke("EndDie", 1.2f);
+
+            // 아이템 드랍
+
+        }
+    }
+
+    void EndDie()
+    {
+        gameObject.SetActive(false);
     }
 }

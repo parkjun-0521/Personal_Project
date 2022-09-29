@@ -24,8 +24,10 @@ public class Skill_Offset : MonoBehaviour
 
     void Move()
     {
+
         if (player.fDown == true) {
-            rigid.AddForce(Vector3.forward * 10, ForceMode2D.Impulse);
+            Debug.Log("hi");
+            transform.Translate(Vector3.forward * 10 * Time.deltaTime);
         }
     }
 }

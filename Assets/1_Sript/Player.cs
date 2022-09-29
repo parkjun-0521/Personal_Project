@@ -7,7 +7,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     // input 변수 
-    float hAxis;                    // 이동 input 변수
+    public float hAxis;                    // 이동 input 변수
     bool jDown;                     // 점프 input 변수
     bool dDown;                     // 회피 input 변수
     bool aDown;                     // 공격 input 변수

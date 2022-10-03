@@ -13,21 +13,34 @@ public class Skill_Offset : MonoBehaviour
 
     void Awake()
     {
-        player = new Player();
+        player = GameObject.Find("Player").GetComponent<Player>();
         rigid = GetComponent<Rigidbody2D>();
     }
     void Update()
     {
         transform.position = target.position + offset;
-        Move();
+
+        Invoke("Move", 0.5f);
     }
 
     void Move()
     {
-
-        if (player.fDown == true) {
-            Debug.Log("hi");
-            transform.Translate(Vector3.forward * 10 * Time.deltaTime);
+        if (player.spriteRenderer.flipX == true) {
+            offset.x -= 0.03f;
+            Invoke("lMoveEnd", 0.8f);
         }
+        else {
+            offset.x += 0.03f;
+            Invoke("rMoveEnd", 0.8f);
+        }
+    }
+
+    void rMoveEnd()
+    {
+        offset.x = 1;
+    }
+    void lMoveEnd()
+    {
+        offset.x = -1;
     }
 }

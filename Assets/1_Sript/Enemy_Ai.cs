@@ -16,13 +16,17 @@ public class Enemy_Ai : MonoBehaviour
 
     public bool hit = false;
 
+    public GameObject itemCoin_1;
+    public GameObject itemCoin_2;
+    public GameObject itemCoin_3;
+    public GameObject itemCoin_4;
+
     public GameObject RightEnemyAttackBox;
     public GameObject LeftEnemyAttackBox;
 
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator anime;
-    
 
     void Awake()
     {
@@ -113,6 +117,13 @@ public class Enemy_Ai : MonoBehaviour
             Vector3 reactVec = transform.position - collision.transform.position;
             OnHit(ondamage.damage, reactVec);         
         }
+        else if (collision.gameObject.tag == "Fire") {
+            hit = true;
+            Skill_Offset ondamage = collision.gameObject.GetComponent<Skill_Offset>();
+            Vector3 reactVec = transform.position - collision.transform.position;
+            OnHit(ondamage.damage, reactVec);
+        }
+        
     }
 
     void OnHit(float damage, Vector3 reVec)
@@ -148,8 +159,21 @@ public class Enemy_Ai : MonoBehaviour
             RightEnemyAttackBox.SetActive(false);
             Invoke("EndDie", 1.2f);
 
-            // 아이템 드랍
 
+            // 아이템 드랍
+            int rand = Random.Range(0, 10);
+            if(rand < 4) {
+                Instantiate(itemCoin_1, transform.position, itemCoin_1.transform.rotation);
+            }
+            else if (rand < 6) {
+                Instantiate(itemCoin_2, transform.position, itemCoin_2.transform.rotation);
+            }
+            else if (rand < 6) {
+                Instantiate(itemCoin_3, transform.position, itemCoin_3.transform.rotation);
+            }
+            else {
+                Instantiate(itemCoin_4, transform.position, itemCoin_4.transform.rotation);
+            }
         }
     }
 

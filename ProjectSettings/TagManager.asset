@@ -10,6 +10,8 @@ TagManager:
   - Attack
   - EnemyAttack
   - Fire
+  - Item
+  - NPC
   layers:
   - Default
   - TransparentFX
@@ -38,8 +40,8 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - NPC
+  - Item
   - Fire
   - EnemyAttack
   - Attack

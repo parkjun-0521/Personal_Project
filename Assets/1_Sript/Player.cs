@@ -7,13 +7,13 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     // input 변수 
-    public float hAxis;                    // 이동 input 변수
+    float hAxis;                    // 이동 input 변수
     bool jDown;                     // 점프 input 변수
     bool dDown;                     // 회피 input 변수
     bool aDown;                     // 공격 input 변수
-    public bool fDown;                     // 스킬 input 변수 
+    bool fDown;                     // 스킬 input 변수 
+    bool iDown;                     // 상호작용 input 변수
 
-    // 이동 변수
     bool moveCheck;
 
     // Turn 변수 
@@ -47,8 +47,17 @@ public class Player : MonoBehaviour
     // 체력
     public float curhealth;
 
+    public int power = 10;
+
     // 스킬
     bool skillCheck;
+    public float skillkDelay;
+    public float maxskillDelay;
+
+    // 아이템 
+    public int point;
+
+    bool isShop;
 
     // 변수 선언 
     public GameObject RightAttackBox;
@@ -58,8 +67,9 @@ public class Player : MonoBehaviour
     public GameObject rSkillBox;
     public GameObject lSkillBox;
 
+    GameObject nearObject;
     Rigidbody2D rigid;              // rigidbody 변수 선언
-    SpriteRenderer spriteRenderer;  // spriteRenderer 변수 선언 
+    public SpriteRenderer spriteRenderer;  // spriteRenderer 변수 선언 
     Animator anime;
     BoxCollider2D boxCollider2D;
 
@@ -81,6 +91,7 @@ public class Player : MonoBehaviour
         Dodge();
         Attack();
         Skill();
+        Interation();
     }
 
     void GetInput()
@@ -90,31 +101,29 @@ public class Player : MonoBehaviour
         dDown = Input.GetButtonDown("Dodge");
         aDown = Input.GetButtonDown("Attack");
         fDown = Input.GetButtonDown("Fire1");
+        iDown = Input.GetButtonDown("Interation");
     }
 
     void Move()
     {
-        // 단순 이동 로직
-        if (!attackCheck && !skillCheck)
-            rigid.AddForce(Vector2.right * hAxis * speed, ForceMode2D.Impulse);
-        else
-            rigid.AddForce(Vector3.zero, ForceMode2D.Force);
+        if (!moveCheck) {
+            // 단순 이동 로직
+             rigid.AddForce(Vector2.right * hAxis * speed, ForceMode2D.Impulse);
 
 
-        // 최대 속도 제한 
-        if (rigid.velocity.x > maxSpeed)
-            rigid.velocity = new Vector2(maxSpeed, rigid.velocity.y);
-        else if (rigid.velocity.x < maxSpeed * (-1))
-            rigid.velocity = new Vector2(maxSpeed * (-1), rigid.velocity.y);
+            // 최대 속도 제한 
+            if (rigid.velocity.x > maxSpeed)
+                rigid.velocity = new Vector2(maxSpeed, rigid.velocity.y);
+            else if (rigid.velocity.x < maxSpeed * (-1))
+                rigid.velocity = new Vector2(maxSpeed * (-1), rigid.velocity.y);
 
-        // 이동 애니메이션 
-        if (rigid.velocity.normalized.x == 0) {
-            anime.SetBool("isRun", false);
-            moveCheck = false;
-        }
-        else {
-            anime.SetBool("isRun", true);
-            moveCheck = true;
+            // 이동 애니메이션 
+            if (rigid.velocity.normalized.x == 0) {
+                anime.SetBool("isRun", false);
+            }
+            else {
+                anime.SetBool("isRun", true);
+            }
         }
     }
 
@@ -122,69 +131,73 @@ public class Player : MonoBehaviour
     {
         // 보는 방향 전환 
         if (Input.GetButton("Horizontal") && !isTurn) {
-            spriteRenderer.flipX = hAxis == -1;
+            if(!attackCheck && !skillCheck)
+                spriteRenderer.flipX = hAxis == -1;
 
             // 공격 콜라이더 생성 
             if (hAxis == -1 && attackCheck == true) {
-                LeftAttackBox.SetActive(true);
-                RightAttackBox.SetActive(false);
-                stopTrun();
+                LAttackSetAtive();
             }
             else if (hAxis == 1 && attackCheck == true) {
-                LeftAttackBox.SetActive(false);
-                RightAttackBox.SetActive(true);
-                stopTrun();
+                RAttackSetAtive();
             }
             else if (hAxis == 0 && attackCheck == true) {
-                LeftAttackBox.SetActive(false);
-                RightAttackBox.SetActive(true);
-                stopTrun();
+                RAttackSetAtive();
             }
             // 스킬 콜라이더 생성 
             if(hAxis == -1 && skillCheck == true) {
-                lSkillBox.SetActive(true);
-                rSkillBox.SetActive(false);
-                isTurn = true;
-                Invoke("EndTurn", 0.5f);
+                LSkillkSetAtive();
             }
             else if (hAxis == 1 && skillCheck == true) {
-                lSkillBox.SetActive(false);
-                rSkillBox.SetActive(true);
-                isTurn = true;
-                Invoke("EndTurn", 0.5f);
+                RSkillkSetAtive();
             }
         }
         else if (!(Input.GetButton("Horizontal")) && !isTurn) {
             if (spriteRenderer.flipX == false && attackCheck == true) {
-                LeftAttackBox.SetActive(false);
-                RightAttackBox.SetActive(true);
-                stopTrun();
+                RAttackSetAtive();
             }
             else if (spriteRenderer.flipX == true && attackCheck == true) {
-                LeftAttackBox.SetActive(true);
-                RightAttackBox.SetActive(false);
-                stopTrun();
+                LAttackSetAtive();
             }
 
             if (spriteRenderer.flipX == false && skillCheck == true) {
-                lSkillBox.SetActive(false);
-                rSkillBox.SetActive(true);
-                isTurn = true;
-                Invoke("EndTurn", 0.5f);
+                RSkillkSetAtive();
             }
             else if (spriteRenderer.flipX == true && skillCheck == true) {
-                lSkillBox.SetActive(true);
-                rSkillBox.SetActive(false);
-                isTurn = true;
-                Invoke("EndTurn", 0.5f);
+                LSkillkSetAtive();
             }
         }
     }
 
-    void stopTrun()
+    void LAttackSetAtive()
+    {
+        LeftAttackBox.SetActive(true);
+        RightAttackBox.SetActive(false);
+        stopTrun(0.7f);
+    } 
+    void RAttackSetAtive()
+    {
+        LeftAttackBox.SetActive(false);
+        RightAttackBox.SetActive(true);
+        stopTrun(0.7f);
+    }
+    void LSkillkSetAtive()
+    {
+        lSkillBox.SetActive(true);
+        rSkillBox.SetActive(false);
+        stopTrun(1f);
+    }
+    void RSkillkSetAtive()
+    {
+        lSkillBox.SetActive(false);
+        rSkillBox.SetActive(true);
+        stopTrun(1f);
+    }
+
+    void stopTrun(float sec)
     {
         isTurn = true;
-        Invoke("EndTurn", 0.7f);
+        Invoke("EndTurn", sec);
     }
 
     void EndTurn()
@@ -230,7 +243,7 @@ public class Player : MonoBehaviour
     // 회피 구현 
     void Dodge()
     {
-        if (dDown && !isDodge && hAxis != 0 && jumpCheck == false) {
+        if (dDown && !isDodge && hAxis != 0 && jumpCheck == false && !isShop) {
             speed *= 2;
             maxSpeed *= 2;
             anime.SetTrigger("doDash");
@@ -244,7 +257,7 @@ public class Player : MonoBehaviour
             maxSpeed *= 2;
             anime.SetTrigger("doDash");
             // 공중 회피시 y위치 고정 
-            rigid.constraints = RigidbodyConstraints2D.FreezePositionY;
+            rigid.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
             isDodge = true;
             dodgeCheck = true;
             Invoke("DodgeOut", 0.3f);
@@ -274,7 +287,8 @@ public class Player : MonoBehaviour
             attackCount = 0;
 
         // 연속 공격 
-        if (aDown && !isDodge && attackDelay > maxDelay && !jumpCheck) {
+        if (aDown && !isDodge && attackDelay > maxDelay && !jumpCheck && !isShop) {
+            moveCheck = true;
             if (attackCount == 0) {
                 attackCheck = true;
                 anime.SetTrigger("doAttack_1");               
@@ -302,7 +316,7 @@ public class Player : MonoBehaviour
                 attackCount = 0;
         }
         // 공중 공격 
-        else if(aDown && !isDodge && attackDelay > maxDelay && jumpCheck) {
+        else if(aDown && !isDodge && attackDelay > maxDelay && jumpCheck && !isShop) {
             attackCheck = true;
             anime.SetBool("isJumpAttack", true);
             attackDelay = 0;
@@ -313,6 +327,7 @@ public class Player : MonoBehaviour
     // 공격이 끝나고 원상태 복귀 
     void AttackEnd()
     {
+        moveCheck = false;
         attackCheck = false;
         anime.SetBool("isJumpAttack", false);
         LeftAttackBox.SetActive(false);
@@ -321,18 +336,39 @@ public class Player : MonoBehaviour
 
     void Skill()
     {
-        if (fDown && !isDodge && attackCheck == false) {
+        skillkDelay += Time.deltaTime;
+        if (fDown && !isDodge && attackCheck == false && skillkDelay > maxskillDelay && !jumpCheck && !isShop) {
+            moveCheck = true;
             skillCheck = true;
+            anime.SetTrigger("doSkill");
+            skillkDelay = 0;
             Invoke("EndSkill", 1f);
         }
+        else if (fDown && !isDodge && !attackCheck && skillkDelay > maxskillDelay && jumpCheck && !isShop) {
+            moveCheck = true;
+            skillCheck = true;
+            rigid.constraints = RigidbodyConstraints2D.FreezeAll;
+            anime.SetTrigger("jumpSkill");
+            skillkDelay = 0;
+            Invoke("EndSkill", 1f);
+            Invoke("End", 0.9f);
+        }
+    }
+
+    void End()
+    {
+        rigid.constraints = RigidbodyConstraints2D.None;
+        rigid.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     void EndSkill()
     {
+        moveCheck = false;
         skillCheck = false;
         lSkillBox.SetActive(false);
         rSkillBox.SetActive(false);
     }
+
     void OnTriggerEnter2D( Collider2D collision )
     {
         if (collision.gameObject.tag == "EnemyAttack") {
@@ -374,5 +410,36 @@ public class Player : MonoBehaviour
     void EndDie()
     {
         gameObject.SetActive(false);
+    }
+
+    void OnTriggerStay2D(Collider2D collision)
+    {
+        if(collision.tag == "NPC") {
+            nearObject = collision.gameObject;
+        }
+    }
+
+    void Interation()
+    {
+        if (iDown && nearObject != null && !jumpCheck && !attackCheck && !isDodge) {
+            if(nearObject.tag == "NPC") {
+                Debug.Log("상점");
+                NPC_Shop shop = nearObject.GetComponent<NPC_Shop>();
+                shop.Enter(this);
+                isShop = true;
+            }
+        }
+    }
+
+    void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.tag == "NPC") {
+            NPC_Shop shop = nearObject.GetComponent<NPC_Shop>();
+
+            // Exit 함수 작동 
+            shop.Exit();
+            isShop = false;
+            nearObject = null;
+        }
     }
 }
